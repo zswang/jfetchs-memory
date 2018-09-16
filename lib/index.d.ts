@@ -5,8 +5,8 @@ import { ICacheStore } from 'jfetchs-util';
  * jfetchs memory store
  * @author
  *   zswang (http://weibo.com/zswang)
- * @version 0.0.1
- * @date 2018-09-12
+ * @version 0.0.6
+ * @date 2018-09-16
  */
 export declare class MemoryStore<T> implements ICacheStore<T> {
     /**
@@ -80,5 +80,22 @@ export declare class MemoryStore<T> implements ICacheStore<T> {
      * @return 返回移除是否成功
      */
     remove(key: string): Promise<boolean>;
+    /**
+     * 回收过期的资源
+     * @example store():gc
+      ```js
+      var store3 = new jfetchs.MemoryStore()
+  store3.save('k3-1', 'data3-1', 0.1)
+  store3.save('k3-2', 'data3-2', 2)
+  setTimeout(() => {
+    store3.gc().then(reply => {
+      console.log(JSON.stringify(reply))
+      // > ["k3-1"]
+      // * done
+    })
+  }, 200)
+      ```
+     */
+    gc(): Promise<string[]>;
 }
 //# sourceMappingURL=index.d.ts.map

@@ -57,5 +57,19 @@ setTimeout(() => {
 }, 200)
   });
           
+  it("store():gc", function (done) {
+    examplejs_printLines = [];
+    var store3 = new jfetchs.MemoryStore()
+store3.save('k3-1', 'data3-1', 0.1)
+store3.save('k3-2', 'data3-2', 2)
+setTimeout(() => {
+  store3.gc().then(reply => {
+    examplejs_print(JSON.stringify(reply))
+    assert.equal(examplejs_printLines.join("\n"), "[\"k3-1\"]"); examplejs_printLines = [];
+    done();
+  })
+}, 200)
+  });
+          
 });
          

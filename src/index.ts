@@ -76,6 +76,28 @@ export class MemoryStore<T> implements ICacheStore<T> {
     delete this.fetchData[key]
     return Promise.resolve(true)
   }
+
+  /**
+   * 回收过期的资源
+   * @example store():gc
+    ```js
+    (*<jdists import="?debug[desc='gc']" />*)
+    ```
+   */
+  gc(): Promise<string[]> {
+    return Promise.all(
+      Object.keys(this.expireAt)
+        .map(key => {
+          if (Date.now() > this.expireAt[key]) {
+            return this.remove(key).then(() => {
+              return key
+            })
+          }
+          return null
+        })
+        .filter(item => item !== null)
+    ) as any
+  }
 }
 
 /*<remove>*/
@@ -126,6 +148,20 @@ setTimeout(() => {
   store2.load('k2').then(reply => {
     console.log(reply)
     // > undefined
+    // * done
+  })
+}, 200)
+/*</debug>*/
+
+/*<debug desc="gc">*/
+var store3 = new jfetchs.MemoryStore()
+store3.save('k3-1', 'data3-1', 0.1)
+store3.save('k3-2', 'data3-2', 2)
+
+setTimeout(() => {
+  store3.gc().then(reply => {
+    console.log(JSON.stringify(reply))
+    // > ["k3-1"]
     // * done
   })
 }, 200)

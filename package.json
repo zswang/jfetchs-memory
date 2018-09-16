@@ -1,6 +1,6 @@
 {
   "name": "jfetchs-memory",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "jfetchs memory store",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
