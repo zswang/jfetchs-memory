@@ -5,9 +5,15 @@ import { ICacheStore } from 'jfetchs-util';
  * jfetchs memory store
  * @author
  *   zswang (http://weibo.com/zswang)
- * @version 0.0.6
- * @date 2018-09-16
+ * @version 0.0.15
+ * @date 2018-11-21
  */
+export interface MemoryStoreOptions {
+    /**
+     * gc 间隔时间
+     */
+    gcDistance?: number;
+}
 export declare class MemoryStore<T> implements ICacheStore<T> {
     /**
      * 缓存开始时间
@@ -17,6 +23,15 @@ export declare class MemoryStore<T> implements ICacheStore<T> {
      * 缓存数据
      */
 //     private fetchData;
+    /**
+     * 配置项
+     */
+//     private options;
+    /**
+     * 最近一次 GC 时间
+     */
+//     private lastGCAt;
+    constructor(options?: MemoryStoreOptions);
     /**
      * 加载缓存数据 load data from cache
      * @param key 键值
@@ -97,5 +112,23 @@ export declare class MemoryStore<T> implements ICacheStore<T> {
       ```
      */
     gc(): Promise<string[]>;
+    /**
+     * 自动回收内存
+     * @example store():autoGC
+      ```js
+      var store4 = new jfetchs.MemoryStore({ gcDistance: 10 })
+  store4.save('k4-1', 'data4-1', 0.1)
+  store4.save('k4-2', 'data4-2', 0.1)
+  setTimeout(() => {
+    console.log(JSON.stringify(Object.keys(store4['fetchData'])))
+    // > ["k4-1","k4-2"]
+    store4.load('k4')
+    console.log(JSON.stringify(Object.keys(store4['fetchData'])))
+    // > []
+    // * done
+  }, 200)
+      ```
+     */
+//     private autoGC;
 }
 //# sourceMappingURL=index.d.ts.map

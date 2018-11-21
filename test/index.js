@@ -71,5 +71,20 @@ setTimeout(() => {
 }, 200)
   });
           
+  it("store():autoGC", function (done) {
+    examplejs_printLines = [];
+    var store4 = new jfetchs.MemoryStore({ gcDistance: 10 })
+store4.save('k4-1', 'data4-1', 0.1)
+store4.save('k4-2', 'data4-2', 0.1)
+setTimeout(() => {
+  examplejs_print(JSON.stringify(Object.keys(store4['fetchData'])))
+  assert.equal(examplejs_printLines.join("\n"), "[\"k4-1\",\"k4-2\"]"); examplejs_printLines = [];
+  store4.load('k4')
+  examplejs_print(JSON.stringify(Object.keys(store4['fetchData'])))
+  assert.equal(examplejs_printLines.join("\n"), "[]"); examplejs_printLines = [];
+  done();
+}, 200)
+  });
+          
 });
          

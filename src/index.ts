@@ -19,6 +19,13 @@ import { ICacheStore } from 'jfetchs-util'
  */
 /*</jdists>*/
 
+export interface MemoryStoreOptions {
+  /**
+   * gc 间隔时间
+   */
+  gcDistance?: number
+}
+
 export class MemoryStore<T> implements ICacheStore<T> {
   /**
    * 缓存开始时间
@@ -28,6 +35,19 @@ export class MemoryStore<T> implements ICacheStore<T> {
    * 缓存数据
    */
   private fetchData: { [key: string]: T } = {}
+  /**
+   * 配置项
+   */
+  private options: MemoryStoreOptions = {}
+  /**
+   * 最近一次 GC 时间
+   */
+  private lastGCAt: number
+
+  constructor(options: MemoryStoreOptions = {}) {
+    this.options = options
+    this.lastGCAt = Date.now()
+  }
 
   /**
    * 加载缓存数据 load data from cache
@@ -43,6 +63,7 @@ export class MemoryStore<T> implements ICacheStore<T> {
     ```
    */
   load(key: string): Promise<T> {
+    this.autoGC()
     if (key in this.expireAt) {
       if (Date.now() <= this.expireAt[key]) {
         return Promise.resolve(this.fetchData[key])
@@ -59,6 +80,7 @@ export class MemoryStore<T> implements ICacheStore<T> {
    * @return 返回保存是否成功
    */
   save(key: string, data: T, expire: number): Promise<boolean> {
+    this.autoGC()
     this.fetchData[key] = data
     this.expireAt[key] = Date.now() + expire * 1000
     return Promise.resolve(true)
@@ -97,6 +119,23 @@ export class MemoryStore<T> implements ICacheStore<T> {
         })
         .filter(item => item !== null)
     ) as any
+  }
+
+  /**
+   * 自动回收内存
+   * @example store():autoGC
+    ```js
+    (*<jdists import="?debug[desc='autoGC']" />*)
+    ```
+   */
+  private autoGC() {
+    if (this.options.gcDistance) {
+      let now = Date.now()
+      if (now - this.lastGCAt > this.options.gcDistance) {
+        this.lastGCAt = now
+        this.gc()
+      }
+    }
   }
 }
 
@@ -164,6 +203,21 @@ setTimeout(() => {
     // > ["k3-1"]
     // * done
   })
+}, 200)
+/*</debug>*/
+
+/*<debug desc="autoGC">*/
+var store4 = new jfetchs.MemoryStore({ gcDistance: 10 })
+store4.save('k4-1', 'data4-1', 0.1)
+store4.save('k4-2', 'data4-2', 0.1)
+
+setTimeout(() => {
+  console.log(JSON.stringify(Object.keys(store4['fetchData'])))
+  // > ["k4-1","k4-2"]
+  store4.load('k4')
+  console.log(JSON.stringify(Object.keys(store4['fetchData'])))
+  // > []
+  // * done
 }, 200)
 /*</debug>*/
 /*</remove>*/
